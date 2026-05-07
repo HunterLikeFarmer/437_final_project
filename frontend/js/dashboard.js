@@ -1,0 +1,207 @@
+(function () {
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function valueOrDash(value, suffix = "") {
+    if (value === null || value === undefined || value === "") {
+      return "--";
+    }
+    return `${value}${suffix}`;
+  }
+
+  function formatTime(value) {
+    if (!value) {
+      return "--";
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleString([], {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
+
+  function text(value) {
+    return String(value === null || value === undefined ? "" : value);
+  }
+
+  function setText(id, value) {
+    const element = byId(id);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+
+  function metricCard(label, value, note, stateClass = "") {
+    const article = document.createElement("article");
+    article.className = `metric-card ${stateClass}`.trim();
+
+    const labelElement = document.createElement("div");
+    labelElement.className = "label";
+    labelElement.textContent = label;
+
+    const valueElement = document.createElement("div");
+    valueElement.className = "value";
+    valueElement.textContent = value;
+
+    const noteElement = document.createElement("div");
+    noteElement.className = "note";
+    noteElement.textContent = note;
+
+    article.append(labelElement, valueElement, noteElement);
+    return article;
+  }
+
+  function replaceChildren(id, children) {
+    const element = byId(id);
+    if (element) {
+      element.replaceChildren(...children);
+    }
+  }
+
+  function renderStatusCards(status) {
+    const environment = status.environment || {};
+    const safety = status.safety || {};
+    const motion = status.motion || {};
+    const sound = status.sound || {};
+    const alerts = Array.isArray(status.alerts) ? status.alerts : [];
+
+    const boundaryAlert = Boolean(safety.boundary_alert);
+    const lockStatus = safety.lock_status || "unknown";
+    const cryDetected = Boolean(sound.cry_detected);
+    const motionDetected = Boolean(motion.detected);
+
+    replaceChildren("environment-cards", [
+      metricCard("Temperature", valueOrDash(environment.temperature, " C"), "Room sensor reading"),
+      metricCard("Humidity", valueOrDash(environment.humidity, "%"), "Relative humidity"),
+      metricCard("Light", valueOrDash(environment.light || environment.light_level), "Ambient level")
+    ]);
+
+    replaceChildren("safety-cards", [
+      metricCard("Boundary", boundaryAlert ? "Alert" : "Clear", "Safety zone monitor", boundaryAlert ? "bad" : "good"),
+      metricCard("Lock", text(lockStatus), "Door or cabinet state", lockStatus === "locked" ? "good" : "warn"),
+      metricCard("Alerts", text(alerts.length), "Currently active", alerts.length > 0 ? "bad" : "good")
+    ]);
+
+    replaceChildren("activity-cards", [
+      metricCard("Motion", motionDetected ? "Detected" : "Quiet", "Last motion signal", motionDetected ? "warn" : "good"),
+      metricCard("Sound", valueOrDash(sound.level), "Current sound level"),
+      metricCard("Cry", cryDetected ? "Detected" : "No", "Audio classification", cryDetected ? "bad" : "good")
+    ]);
+
+    const timestamps = [
+      environment.last_updated,
+      safety.last_updated,
+      motion.last_updated,
+      sound.last_updated
+    ].filter(Boolean);
+    const lastUpdated = timestamps.length > 0 ? timestamps.sort().at(-1) : null;
+
+    setText("environment-updated", `Updated ${formatTime(environment.last_updated)}`);
+    setText("safety-updated", `Updated ${formatTime(safety.last_updated)}`);
+    setText("activity-updated", `Updated ${formatTime(motion.last_updated || sound.last_updated)}`);
+    setText("last-update", formatTime(lastUpdated));
+    setText("active-alert-count", text(alerts.length));
+    setText("overall-status", alerts.length > 0 || boundaryAlert || cryDetected ? "Needs attention" : "All clear");
+  }
+
+  function renderAlerts(alerts) {
+    const alertList = Array.isArray(alerts) ? alerts : [];
+    const container = byId("alerts");
+    if (!container) {
+      return;
+    }
+
+    if (alertList.length === 0) {
+      container.innerHTML = '<div class="empty-state">No active alerts.</div>';
+      return;
+    }
+
+    const nodes = alertList.map((alert) => {
+      const severity = (alert.severity || "low").toLowerCase();
+      const item = document.createElement("article");
+      item.className = `alert-item ${severity}`;
+
+      const title = document.createElement("div");
+      title.className = "item-title";
+      title.innerHTML = `<span></span><span class="severity-badge"></span>`;
+      title.children[0].textContent = alert.message || alert.alert_type || "Active alert";
+      title.children[1].textContent = severity;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = `${alert.source || alert.node_id || "system"} - ${formatTime(alert.timestamp)}`;
+
+      item.append(title, meta);
+      return item;
+    });
+
+    container.replaceChildren(...nodes);
+  }
+
+  function renderEvents(response) {
+    const events = Array.isArray(response) ? response : response.events || [];
+    const container = byId("event-log");
+    if (!container) {
+      return;
+    }
+
+    if (events.length === 0) {
+      container.innerHTML = '<div class="empty-state">No recent events yet.</div>';
+      return;
+    }
+
+    const nodes = events.map((event) => {
+      const severity = (event.severity || "low").toLowerCase();
+      const item = document.createElement("article");
+      item.className = `event-item ${severity}`;
+
+      const title = document.createElement("div");
+      title.className = "item-title";
+      title.innerHTML = `<span></span><span class="severity-badge"></span>`;
+      title.children[0].textContent = event.message || event.event_type || "Event";
+      title.children[1].textContent = event.event_type || severity;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = `${event.source || "system"} - ${formatTime(event.timestamp)}`;
+
+      item.append(title, meta);
+      return item;
+    });
+
+    container.replaceChildren(...nodes);
+  }
+
+  function setConnectionStatus(isConnected, label) {
+    const element = byId("connection-status");
+    if (!element) {
+      return;
+    }
+
+    element.classList.toggle("connected", isConnected);
+    element.classList.toggle("disconnected", !isConnected);
+    element.lastChild.textContent = ` ${label || (isConnected ? "Connected" : "Offline")}`;
+  }
+
+  function setCommandStatus(message) {
+    setText("command-status", message);
+  }
+
+  window.SmartToddlerDashboard = {
+    renderStatusCards,
+    renderAlerts,
+    renderEvents,
+    setConnectionStatus,
+    setCommandStatus,
+    formatTime
+  };
+})();

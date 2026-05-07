@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Toddler Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Local Care Monitor</p>
+      <h1>Smart Toddler Dashboard</h1>
+    </div>
+    <div class="connection-pill" id="connection-status">
+      <span class="status-dot"></span>
+      Connecting
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="summary-band" aria-label="System summary">
+      <div class="summary-item">
+        <span class="summary-label">Overall Status</span>
+        <strong id="overall-status">Waiting for backend</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Last Update</span>
+        <strong id="last-update">--</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Active Alerts</span>
+        <strong id="active-alert-count">0</strong>
+      </div>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Current readings">
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Environment</p>
+            <h2>Room Conditions</h2>
+          </div>
+          <span class="panel-status" id="environment-updated">No data</span>
+        </div>
+        <div class="metric-grid" id="environment-cards"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Safety</p>
+            <h2>Boundary & Lock</h2>
+          </div>
+          <span class="panel-status" id="safety-updated">No data</span>
+        </div>
+        <div class="metric-grid" id="safety-cards"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Sound & Motion</p>
+            <h2>Activity</h2>
+          </div>
+          <span class="panel-status" id="activity-updated">No data</span>
+        </div>
+        <div class="metric-grid" id="activity-cards"></div>
+      </article>
+
+      <article class="panel controls-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Commands</p>
+            <h2>Parent Controls</h2>
+          </div>
+          <span class="panel-status" id="command-status">Ready</span>
+        </div>
+        <div class="control-grid" id="controls">
+          <button type="button" class="control-button" data-action="play_lullaby" data-target="control" data-value="true">
+            <span class="button-icon" aria-hidden="true">L</span>
+            Play Lullaby
+          </button>
+          <button type="button" class="control-button secondary" data-action="stop_lullaby" data-target="control" data-value="false">
+            <span class="button-icon" aria-hidden="true">S</span>
+            Stop
+          </button>
+          <button type="button" class="control-button" data-action="lock" data-target="safety" data-value="true">
+            <span class="button-icon" aria-hidden="true">LK</span>
+            Lock
+          </button>
+          <button type="button" class="control-button warning" data-action="unlock" data-target="safety" data-value="true">
+            <span class="button-icon" aria-hidden="true">UL</span>
+            Unlock
+          </button>
+          <button type="button" class="control-button danger wide" data-action="reset_alarm" data-target="system" data-reset-alert="true">
+            <span class="button-icon" aria-hidden="true">!</span>
+            Reset Alarm
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <section class="lower-grid">
+      <article class="panel alerts-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Alerts</p>
+            <h2>Active Alert Panel</h2>
+          </div>
+        </div>
+        <div id="alerts" class="alerts-list"></div>
+      </article>
+
+      <article class="panel event-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">History</p>
+            <h2>Recent Event Log</h2>
+          </div>
+          <button type="button" class="small-button" id="refresh-events">Refresh</button>
+        </div>
+        <div id="event-log" class="event-log"></div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <span>Backend API: <code id="api-base-label">same origin</code></span>
+    <span id="footer-message">Polling status every 2 seconds</span>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/controls.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
