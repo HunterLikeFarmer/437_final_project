@@ -49,54 +49,35 @@
       <article class="panel">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Safety</p>
-            <h2>Boundary & Lock</h2>
-          </div>
-          <span class="panel-status" id="safety-updated">No data</span>
-        </div>
-        <div class="metric-grid" id="safety-cards"></div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-heading">
-          <div>
             <p class="eyebrow">Sound & Motion</p>
-            <h2>Activity</h2>
+            <h2>Environmental Node Activity</h2>
           </div>
           <span class="panel-status" id="activity-updated">No data</span>
         </div>
         <div class="metric-grid" id="activity-cards"></div>
       </article>
 
-      <article class="panel controls-panel">
+      <article class="panel">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Commands</p>
-            <h2>Parent Controls</h2>
+            <p class="eyebrow">MQTT Source</p>
+            <h2>Environmental Node</h2>
           </div>
-          <span class="panel-status" id="command-status">Ready</span>
+          <span class="panel-status" id="command-status">Listening</span>
         </div>
-        <div class="control-grid" id="controls">
-          <button type="button" class="control-button" data-action="play_lullaby" data-target="control" data-value="true">
-            <span class="button-icon" aria-hidden="true">L</span>
-            Play Lullaby
-          </button>
-          <button type="button" class="control-button secondary" data-action="stop_lullaby" data-target="control" data-value="false">
-            <span class="button-icon" aria-hidden="true">S</span>
-            Stop
-          </button>
-          <button type="button" class="control-button" data-action="lock" data-target="safety" data-value="true">
-            <span class="button-icon" aria-hidden="true">LK</span>
-            Lock
-          </button>
-          <button type="button" class="control-button warning" data-action="unlock" data-target="safety" data-value="true">
-            <span class="button-icon" aria-hidden="true">UL</span>
-            Unlock
-          </button>
-          <button type="button" class="control-button danger wide" data-action="reset_alarm" data-target="system" data-reset-alert="true">
-            <span class="button-icon" aria-hidden="true">!</span>
-            Reset Alarm
-          </button>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="summary-label">Node ID</span>
+            <strong id="source-node-id">--</strong>
+          </div>
+          <div class="detail-item">
+            <span class="summary-label">Topic</span>
+            <strong>smart_toddler/environment/status</strong>
+          </div>
+          <div class="detail-item wide">
+            <span class="summary-label">Payload Data</span>
+            <strong>temperature, humidity, light_level, sound_level, motion_detected</strong>
+          </div>
         </div>
       </article>
     </section>

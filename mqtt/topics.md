@@ -9,7 +9,7 @@ smart_toddler/<node>/<message_type>
 Backend subscriptions:
 
 ```text
-smart_toddler/+/status
+smart_toddler/environment/status
 smart_toddler/system/alert
 smart_toddler/system/heartbeat
 ```
@@ -24,7 +24,7 @@ Common topics:
 
 | Topic | Direction | Purpose |
 |---|---|---|
-| `smart_toddler/environment/status` | Device to backend | Temperature, humidity, and light updates |
+| `smart_toddler/environment/status` | Device to backend | Temperature, humidity, light, sound, and motion updates |
 | `smart_toddler/safety/status` | Device to backend | Boundary and lock status |
 | `smart_toddler/control/status` | Device to backend | Motion, sound, and command acknowledgments |
 | `smart_toddler/environment/command` | Backend to device | Environment node commands |

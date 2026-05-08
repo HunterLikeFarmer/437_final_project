@@ -8,6 +8,7 @@ from utils import now_iso
 _state_lock = Lock()
 _current_state = default_system_state()
 _next_alert_id = 1
+ENVIRONMENT_STATUS_TOPIC = "smart_toddler/environment/status"
 
 
 # Returns the payload timestamp, or creates a current timestamp if missing.
@@ -39,13 +40,30 @@ def update_state_from_mqtt(topic, payload):
     data = payload.get("data", {})
 
     with _state_lock:
-        if "/environment/" in topic:
+        if topic == ENVIRONMENT_STATUS_TOPIC:
             _current_state["environment"].update({
+                "node_id": payload.get("node_id"),
+                "status": payload.get("status"),
                 "temperature": data.get("temperature", payload.get("temperature")),
                 "humidity": data.get("humidity", payload.get("humidity")),
                 "light": data.get("light_level", data.get("light", payload.get("light"))),
                 "last_updated": timestamp
             })
+
+            motion_detected = data.get("motion_detected", payload.get("motion_detected"))
+            sound_level = data.get("sound_level", payload.get("sound_level"))
+
+            if motion_detected is not None:
+                _current_state["motion"].update({
+                    "detected": bool(motion_detected),
+                    "last_updated": timestamp
+                })
+
+            if sound_level is not None:
+                _current_state["sound"].update({
+                    "level": sound_level,
+                    "last_updated": timestamp
+                })
 
         if "/safety/" in topic:
             boundary_alert = data.get("boundary_alert", payload.get("boundary_alert", False))

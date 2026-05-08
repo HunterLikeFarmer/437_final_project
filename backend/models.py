@@ -29,6 +29,8 @@ def make_event(source, event_type, severity, message, raw_payload=None, timestam
 def default_system_state():
     return {
         "environment": {
+            "node_id": None,
+            "status": None,
             "temperature": None,
             "humidity": None,
             "light": None,

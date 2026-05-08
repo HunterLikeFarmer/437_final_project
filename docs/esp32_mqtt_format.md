@@ -46,6 +46,16 @@ alert
 heartbeat
 ```
 
+## Topics The Current ESP32 File Publishes
+
+The uploaded `ESP_Environmental_Node.ino` publishes one status topic:
+
+```text
+smart_toddler/environment/status
+```
+
+Its payload contains temperature, humidity, light, sound, and motion in one JSON message.
+
 ## Topics ESP32 Devices Should Publish
 
 Environment node:
@@ -137,12 +147,13 @@ Payload:
 ```json
 {
   "node_id": "environment_1",
-  "timestamp": "2026-05-07T12:00:00Z",
   "status": "ok",
   "data": {
     "temperature": 22.5,
     "humidity": 44,
-    "light_level": 310
+    "light_level": 310,
+    "sound_level": 120,
+    "motion_detected": 1
   }
 }
 ```
@@ -154,6 +165,8 @@ Expected units:
 | `temperature` | Celsius |
 | `humidity` | Percent |
 | `light_level` | Raw sensor value or lux, but keep it consistent |
+| `sound_level` | Raw analog sound sensor value |
+| `motion_detected` | Digital PIR value, usually `0` or `1` |
 
 ## Safety Status Payload
 

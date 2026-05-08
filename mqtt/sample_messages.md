@@ -13,12 +13,13 @@ Payload:
 ```json
 {
   "node_id": "environment_1",
-  "timestamp": "2026-05-07T12:00:00Z",
   "status": "ok",
   "data": {
     "temperature": 22.5,
     "humidity": 44,
-    "light_level": 310
+    "light_level": 310,
+    "sound_level": 120,
+    "motion_detected": 1
   }
 }
 ```

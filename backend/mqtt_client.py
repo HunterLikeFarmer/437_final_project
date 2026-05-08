@@ -38,7 +38,7 @@ def on_connect(client, userdata, flags, rc):
     _mqtt_connected = rc == 0
 
     if rc == 0:
-        client.subscribe("smart_toddler/+/status")
+        client.subscribe("smart_toddler/environment/status")
         client.subscribe("smart_toddler/system/alert")
         client.subscribe("smart_toddler/system/heartbeat")
         create_event("mqtt", "system", "low", "Connected to MQTT broker")

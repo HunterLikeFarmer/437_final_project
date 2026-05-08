@@ -58,7 +58,7 @@ See `docs/api_reference.md` for examples.
 The backend subscribes to:
 
 ```text
-smart_toddler/+/status
+smart_toddler/environment/status
 smart_toddler/system/alert
 smart_toddler/system/heartbeat
 ```

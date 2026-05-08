@@ -220,10 +220,29 @@ h2 {
   background: #fff1ef;
 }
 
-.control-grid {
+.control-grid,
+.detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.detail-item {
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+}
+
+.detail-item strong {
+  display: block;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+}
+
+.detail-item.wide {
+  grid-column: 1 / -1;
 }
 
 .control-button,
@@ -404,7 +423,8 @@ code {
 
   .summary-band,
   .metric-grid,
-  .control-grid {
+  .control-grid,
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 

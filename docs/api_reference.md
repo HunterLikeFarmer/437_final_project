@@ -14,6 +14,26 @@ Returns backend health and MQTT connection status.
 
 Returns the latest in-memory dashboard state.
 
+The current ESP32 environmental node updates these fields through `smart_toddler/environment/status`:
+
+```json
+{
+  "environment": {
+    "node_id": "environment_1",
+    "status": "ok",
+    "temperature": 22,
+    "humidity": 45,
+    "light": 1200
+  },
+  "motion": {
+    "detected": true
+  },
+  "sound": {
+    "level": 512
+  }
+}
+```
+
 ## GET /api/events?limit=50
 
 Returns recent event log entries from SQLite.

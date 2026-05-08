@@ -76,8 +76,8 @@
 
     const boundaryAlert = Boolean(safety.boundary_alert);
     const lockStatus = safety.lock_status || "unknown";
-    const cryDetected = Boolean(sound.cry_detected);
     const motionDetected = Boolean(motion.detected);
+    const nodeStatus = environment.status || "waiting";
 
     replaceChildren("environment-cards", [
       metricCard("Temperature", valueOrDash(environment.temperature, " C"), "Room sensor reading"),
@@ -93,8 +93,8 @@
 
     replaceChildren("activity-cards", [
       metricCard("Motion", motionDetected ? "Detected" : "Quiet", "Last motion signal", motionDetected ? "warn" : "good"),
-      metricCard("Sound", valueOrDash(sound.level), "Current sound level"),
-      metricCard("Cry", cryDetected ? "Detected" : "No", "Audio classification", cryDetected ? "bad" : "good")
+      metricCard("Sound", valueOrDash(sound.level), "Raw sound sensor value"),
+      metricCard("Node", environment.node_id || "--", `Status: ${nodeStatus}`, nodeStatus === "ok" ? "good" : "")
     ]);
 
     const timestamps = [
@@ -108,9 +108,11 @@
     setText("environment-updated", `Updated ${formatTime(environment.last_updated)}`);
     setText("safety-updated", `Updated ${formatTime(safety.last_updated)}`);
     setText("activity-updated", `Updated ${formatTime(motion.last_updated || sound.last_updated)}`);
+    setText("source-node-id", environment.node_id || "--");
+    setText("command-status", environment.status ? `Status: ${environment.status}` : "Listening");
     setText("last-update", formatTime(lastUpdated));
     setText("active-alert-count", text(alerts.length));
-    setText("overall-status", alerts.length > 0 || boundaryAlert || cryDetected ? "Needs attention" : "All clear");
+    setText("overall-status", alerts.length > 0 || boundaryAlert || motionDetected ? "Needs attention" : "All clear");
   }
 
   function renderAlerts(alerts) {
