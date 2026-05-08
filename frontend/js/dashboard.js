@@ -46,6 +46,16 @@
     return false;
   }
 
+  function formatLockStatus(value) {
+    if (value === "locked") {
+      return "Locked";
+    }
+    if (value === "unlocked") {
+      return "Unlocked";
+    }
+    return "Unknown";
+  }
+
   function setText(id, value) {
     const element = byId(id);
     if (element) {
@@ -106,7 +116,7 @@
 
     replaceChildren("safety-cards", [
       metricCard("Kid Close", kidsClose ? "Yes" : "No", "ESP32 value: kids_close", kidsClose ? "bad" : "good"),
-      metricCard("Lock", text(lockStatus), `ESP32 value: ${valueOrDash(lockValue)}`, lockStatus === "locked" ? "good" : "warn"),
+      metricCard("Lock", formatLockStatus(lockStatus), `ESP32 value: ${valueOrDash(lockValue)}`, lockStatus === "locked" ? "good" : "warn"),
       metricCard("Node", safety.node_id || "--", `Lock node: ${lock.node_id || "--"}`, safetyStatus === "ok" && lockNodeStatus === "ok" ? "good" : "")
     ]);
 

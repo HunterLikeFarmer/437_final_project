@@ -61,7 +61,7 @@
   }
 
   function startPolling() {
-    statusTimer = window.setInterval(refreshDashboard, 2000);
+    statusTimer = window.setInterval(refreshDashboard, 500);
     eventsTimer = window.setInterval(refreshEvents, 5000);
     healthTimer = window.setInterval(refreshHealth, 10000);
   }

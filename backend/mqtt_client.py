@@ -58,6 +58,7 @@ def on_disconnect(client, userdata, rc):
 # Handles incoming MQTT messages by updating state and logging events.
 def on_message(client, userdata, msg):
     payload = safe_json_loads(msg.payload)
+    print(f"received: {payload}")
     topic = msg.topic
     update_state_from_mqtt(topic, payload)
     process_mqtt_event(topic, payload)
@@ -70,6 +71,10 @@ def publish_command(topic, payload):
 
     if _mqtt_client is None:
         create_event("backend", "system_error", "medium", "MQTT client not available for command publish", payload)
+        return False
+
+    if not _mqtt_connected or not _mqtt_client.is_connected():
+        create_event("backend", "system_error", "medium", f"MQTT client is not connected for command publish to {topic}", payload)
         return False
 
     result = _mqtt_client.publish(topic, json.dumps(payload))

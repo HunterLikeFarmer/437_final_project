@@ -53,11 +53,13 @@ def handle_command(command_request):
             "status": "queued",
             "target": target,
             "command": command,
+            "topic": topic,
             "message": "Command was logged, but MQTT publish did not confirm success"
         }, 202
 
     return {
         "status": "sent",
         "target": target,
-        "command": command
+        "command": command,
+        "topic": topic
     }, 200

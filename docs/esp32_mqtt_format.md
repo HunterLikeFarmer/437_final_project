@@ -221,7 +221,7 @@ Payload:
   "node_id": "lock_1",
   "status": "ok",
   "data": {
-    "lock_status": 0
+    "lock_value": 0
   }
 }
 ```
@@ -230,11 +230,11 @@ Field meanings:
 
 | Field | Meaning |
 |---|---|
-| `lock_status` | `1` means locked, `0` means unlocked |
+| `lock_value` | `1` means locked, `0` means unlocked |
 
 The `data` object for `smart_toddler/lock/status` should contain only this one field. The backend also accepts the compact form `"data": 1` or `"data": 0`.
 
-The backend converts `lock_status` into dashboard text:
+The backend converts `lock_value` into dashboard text:
 
 ```text
 1 -> locked
@@ -388,7 +388,7 @@ After a lock state change, publish the normal lock status again so the dashboard
   "node_id": "lock_1",
   "status": "ok",
   "data": {
-    "lock_status": 1
+    "lock_value": 1
   }
 }
 ```

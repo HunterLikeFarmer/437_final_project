@@ -63,14 +63,14 @@ Payload:
   "node_id": "lock_1",
   "status": "ok",
   "data": {
-    "lock_status": 0
+    "lock_value": 0
   }
 }
 ```
 
-`lock_status` should be `1` for locked and `0` for unlocked.
+`lock_value` should be `1` for locked and `0` for unlocked.
 
-The lock `data` object should contain only `lock_status`. The backend also accepts `"data": 1` or `"data": 0`.
+The lock `data` object should contain only `lock_value`. The backend also accepts `"data": 1` or `"data": 0`.
 
 ## Alert
 

@@ -121,7 +121,7 @@ def update_state_from_mqtt(topic, payload):
 
         if topic == LOCK_STATUS_TOPIC:
             has_scalar_data = raw_data not in (None, {}) and not isinstance(raw_data, dict)
-            has_lock_status = has_scalar_data or any(key in data for key in ("lock_status", "locked", "lock")) or any(key in payload for key in ("lock_status", "locked", "lock"))
+            has_lock_value = has_scalar_data or any(key in data for key in ("lock_value", "lock_status", "locked", "lock")) or any(key in payload for key in ("lock_value", "lock_status", "locked", "lock"))
 
             _current_state["lock"].update({
                 "node_id": payload.get("node_id"),
@@ -129,8 +129,20 @@ def update_state_from_mqtt(topic, payload):
                 "last_updated": timestamp
             })
 
-            if has_lock_status:
-                lock_value = raw_data if has_scalar_data else data.get("lock_status", data.get("locked", data.get("lock", payload.get("lock_status", payload.get("locked", payload.get("lock"))))))
+            if has_lock_value:
+                lock_value = raw_data if has_scalar_data else data.get(
+                    "lock_value",
+                    data.get(
+                        "lock_status",
+                        data.get(
+                            "locked",
+                            data.get(
+                                "lock",
+                                payload.get("lock_value", payload.get("lock_status", payload.get("locked", payload.get("lock"))))
+                            )
+                        )
+                    )
+                )
                 _current_state["lock"].update({
                     "lock_value": lock_value,
                     "lock_status": _lock_status(lock_value)

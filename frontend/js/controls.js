@@ -1,6 +1,7 @@
 (function () {
   const Api = window.SmartToddlerApi;
   const Dashboard = window.SmartToddlerDashboard;
+  let controlsBusy = false;
 
   function parseValue(rawValue) {
     if (rawValue === "true") {
@@ -16,8 +17,9 @@
   }
 
   function setButtonsDisabled(isDisabled) {
+    controlsBusy = isDisabled;
     document.querySelectorAll("#controls button").forEach((button) => {
-      button.disabled = isDisabled;
+      button.disabled = isDisabled || button.dataset.canSend === "false";
     });
   }
 
@@ -31,19 +33,27 @@
 
     const lock = status.lock || {};
     const isLocked = lock.lock_status === "locked";
+    const isUnlocked = lock.lock_status === "unlocked";
+    const canSend = isLocked || isUnlocked;
     const action = isLocked ? "unlock" : "lock";
 
     button.dataset.target = "lock";
     button.dataset.action = action;
     button.dataset.value = isLocked ? "false" : "true";
+    button.dataset.canSend = canSend ? "true" : "false";
+    button.disabled = controlsBusy || !canSend;
     button.classList.toggle("warning", isLocked);
     icon.textContent = isLocked ? "U" : "L";
-    label.textContent = isLocked ? "Unlock Device" : "Lock Device";
+    label.textContent = canSend ? (isLocked ? "Unlock Device" : "Lock Device") : "Waiting for Lock State";
   }
 
   async function handleControlClick(event) {
     const button = event.target.closest("button[data-action]");
     if (!button) {
+      return;
+    }
+    if (button.dataset.canSend === "false") {
+      Dashboard.setCommandStatus("Waiting for lock state");
       return;
     }
 
@@ -59,8 +69,12 @@
         await Api.resetAlert();
       }
 
-      await Api.sendCommand(target, action, value);
-      Dashboard.setCommandStatus("Sent");
+      const response = await Api.sendCommand(target, action, value);
+      if (response.status === "sent") {
+        Dashboard.setCommandStatus("Sent");
+      } else {
+        Dashboard.setCommandStatus(response.message || "Command queued");
+      }
       window.dispatchEvent(new CustomEvent("smart-toddler:command-sent"));
     } catch (error) {
       Dashboard.setCommandStatus(error.message || "Command failed");
