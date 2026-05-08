@@ -59,6 +59,7 @@ The backend subscribes to:
 
 ```text
 smart_toddler/environment/status
+smart_toddler/safety/status
 smart_toddler/system/alert
 smart_toddler/system/heartbeat
 ```

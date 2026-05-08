@@ -46,7 +46,11 @@ def default_system_state():
             "last_updated": None
         },
         "safety": {
+            "node_id": None,
+            "status": None,
+            "kids_close": False,
             "boundary_alert": False,
+            "lock_value": None,
             "lock_status": "unknown",
             "last_updated": None
         },

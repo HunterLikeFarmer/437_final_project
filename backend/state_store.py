@@ -9,6 +9,7 @@ _state_lock = Lock()
 _current_state = default_system_state()
 _next_alert_id = 1
 ENVIRONMENT_STATUS_TOPIC = "smart_toddler/environment/status"
+SAFETY_STATUS_TOPIC = "smart_toddler/safety/status"
 
 
 # Returns the payload timestamp, or creates a current timestamp if missing.
@@ -32,6 +33,26 @@ def _upsert_alert(alert):
         _current_state["alerts"].append(alert)
     else:
         _current_state["alerts"][existing_index] = alert
+
+
+# Converts ESP32 1/0, true/false, or text values into a Python boolean.
+def _device_bool(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    if isinstance(value, str):
+        return value.strip().lower() in ("1", "true", "yes", "locked", "close", "near")
+    return False
+
+
+# Converts the ESP32 lock flag into a readable lock status string.
+def _lock_status(value):
+    if value is None:
+        return "unknown"
+    if isinstance(value, str) and value.strip().lower() in ("locked", "unlocked", "unknown"):
+        return value.strip().lower()
+    return "locked" if _device_bool(value) else "unlocked"
 
 
 # Updates the in-memory dashboard state based on an MQTT topic and payload.
@@ -65,20 +86,30 @@ def update_state_from_mqtt(topic, payload):
                     "last_updated": timestamp
                 })
 
-        if "/safety/" in topic:
-            boundary_alert = data.get("boundary_alert", payload.get("boundary_alert", False))
-            lock_status = data.get("lock_status", payload.get("lock_status", _current_state["safety"]["lock_status"]))
+        if topic == SAFETY_STATUS_TOPIC:
+            kids_close_value = data.get(
+                "kids_close",
+                data.get("kid_close", data.get("child_close", data.get("boundary_alert", payload.get("kids_close", False))))
+            )
+            lock_value = data.get("lock_status", data.get("locked", payload.get("lock_status")))
+            kids_close = _device_bool(kids_close_value)
+            lock_status = _lock_status(lock_value)
+
             _current_state["safety"].update({
-                "boundary_alert": bool(boundary_alert),
+                "node_id": payload.get("node_id"),
+                "status": payload.get("status"),
+                "kids_close": kids_close,
+                "boundary_alert": kids_close,
+                "lock_value": lock_value,
                 "lock_status": lock_status,
                 "last_updated": timestamp
             })
 
-            if boundary_alert:
+            if kids_close:
                 _upsert_alert(make_alert(
-                    alert_id=payload.get("id"),
+                    alert_id=payload.get("id", "safety_boundary"),
                     severity=payload.get("severity", "high"),
-                    message=payload.get("message", "Safety boundary alert triggered"),
+                    message=payload.get("message", "Kid is close to the safety boundary"),
                     source=payload.get("node_id", "safety"),
                     timestamp=timestamp,
                     alert_type=payload.get("alert_type", "boundary")

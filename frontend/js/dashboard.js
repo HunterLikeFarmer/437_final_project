@@ -74,10 +74,12 @@
     const sound = status.sound || {};
     const alerts = Array.isArray(status.alerts) ? status.alerts : [];
 
-    const boundaryAlert = Boolean(safety.boundary_alert);
+    const kidsClose = Boolean(safety.kids_close || safety.boundary_alert);
     const lockStatus = safety.lock_status || "unknown";
+    const lockValue = safety.lock_value;
     const motionDetected = Boolean(motion.detected);
-    const nodeStatus = environment.status || "waiting";
+    const environmentStatus = environment.status || "waiting";
+    const safetyStatus = safety.status || "waiting";
 
     replaceChildren("environment-cards", [
       metricCard("Temperature", valueOrDash(environment.temperature, " C"), "Room sensor reading"),
@@ -86,15 +88,15 @@
     ]);
 
     replaceChildren("safety-cards", [
-      metricCard("Boundary", boundaryAlert ? "Alert" : "Clear", "Safety zone monitor", boundaryAlert ? "bad" : "good"),
-      metricCard("Lock", text(lockStatus), "Door or cabinet state", lockStatus === "locked" ? "good" : "warn"),
-      metricCard("Alerts", text(alerts.length), "Currently active", alerts.length > 0 ? "bad" : "good")
+      metricCard("Kid Close", kidsClose ? "Yes" : "No", "ESP32 value: kids_close", kidsClose ? "bad" : "good"),
+      metricCard("Lock", text(lockStatus), `ESP32 value: ${valueOrDash(lockValue)}`, lockStatus === "locked" ? "good" : "warn"),
+      metricCard("Node", safety.node_id || "--", `Status: ${safetyStatus}`, safetyStatus === "ok" ? "good" : "")
     ]);
 
     replaceChildren("activity-cards", [
       metricCard("Motion", motionDetected ? "Detected" : "Quiet", "Last motion signal", motionDetected ? "warn" : "good"),
       metricCard("Sound", valueOrDash(sound.level), "Raw sound sensor value"),
-      metricCard("Node", environment.node_id || "--", `Status: ${nodeStatus}`, nodeStatus === "ok" ? "good" : "")
+      metricCard("Node", environment.node_id || "--", `Status: ${environmentStatus}`, environmentStatus === "ok" ? "good" : "")
     ]);
 
     const timestamps = [
@@ -108,11 +110,12 @@
     setText("environment-updated", `Updated ${formatTime(environment.last_updated)}`);
     setText("safety-updated", `Updated ${formatTime(safety.last_updated)}`);
     setText("activity-updated", `Updated ${formatTime(motion.last_updated || sound.last_updated)}`);
-    setText("source-node-id", environment.node_id || "--");
-    setText("command-status", environment.status ? `Status: ${environment.status}` : "Listening");
+    setText("environment-node-id", environment.node_id || "--");
+    setText("safety-node-id", safety.node_id || "--");
+    setText("command-status", environment.status || safety.status ? "Receiving" : "Listening");
     setText("last-update", formatTime(lastUpdated));
     setText("active-alert-count", text(alerts.length));
-    setText("overall-status", alerts.length > 0 || boundaryAlert || motionDetected ? "Needs attention" : "All clear");
+    setText("overall-status", alerts.length > 0 || kidsClose || motionDetected ? "Needs attention" : "All clear");
   }
 
   function renderAlerts(alerts) {

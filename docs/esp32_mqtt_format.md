@@ -46,15 +46,16 @@ alert
 heartbeat
 ```
 
-## Topics The Current ESP32 File Publishes
+## Topics The Current Backend Listens To
 
-The uploaded `ESP_Environmental_Node.ino` publishes one status topic:
+The current backend and frontend expect the environmental node and safety node to publish these topics:
 
 ```text
 smart_toddler/environment/status
+smart_toddler/safety/status
 ```
 
-Its payload contains temperature, humidity, light, sound, and motion in one JSON message.
+The environmental payload stays the same as `ESP_Environmental_Node.ino`. The safety payload should contain whether the kid got close and whether the lock is locked.
 
 ## Topics ESP32 Devices Should Publish
 
@@ -181,21 +182,26 @@ Payload:
 ```json
 {
   "node_id": "safety_1",
-  "timestamp": "2026-05-07T12:00:05Z",
   "status": "ok",
   "data": {
-    "boundary_alert": false,
-    "lock_status": "locked"
+    "kids_close": 1,
+    "lock_status": 0
   }
 }
 ```
 
-Allowed `lock_status` values:
+Field meanings:
+
+| Field | Meaning |
+|---|---|
+| `kids_close` | `1` means the kid is close to the safety boundary, `0` means clear |
+| `lock_status` | `1` means locked, `0` means unlocked |
+
+The backend converts `lock_status` into dashboard text:
 
 ```text
-locked
-unlocked
-unknown
+1 -> locked
+0 -> unlocked
 ```
 
 ## Control Status Payload

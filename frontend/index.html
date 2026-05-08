@@ -49,6 +49,17 @@
       <article class="panel">
         <div class="panel-heading">
           <div>
+            <p class="eyebrow">Safety</p>
+            <h2>Boundary & Lock</h2>
+          </div>
+          <span class="panel-status" id="safety-updated">No data</span>
+        </div>
+        <div class="metric-grid" id="safety-cards"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading">
+          <div>
             <p class="eyebrow">Sound & Motion</p>
             <h2>Environmental Node Activity</h2>
           </div>
@@ -61,22 +72,30 @@
         <div class="panel-heading">
           <div>
             <p class="eyebrow">MQTT Source</p>
-            <h2>Environmental Node</h2>
+            <h2>Node Topics</h2>
           </div>
           <span class="panel-status" id="command-status">Listening</span>
         </div>
         <div class="detail-grid">
           <div class="detail-item">
-            <span class="summary-label">Node ID</span>
-            <strong id="source-node-id">--</strong>
+            <span class="summary-label">Environment Node</span>
+            <strong id="environment-node-id">--</strong>
           </div>
           <div class="detail-item">
-            <span class="summary-label">Topic</span>
+            <span class="summary-label">Safety Node</span>
+            <strong id="safety-node-id">--</strong>
+          </div>
+          <div class="detail-item wide">
+            <span class="summary-label">Environment Topic</span>
             <strong>smart_toddler/environment/status</strong>
           </div>
           <div class="detail-item wide">
-            <span class="summary-label">Payload Data</span>
-            <strong>temperature, humidity, light_level, sound_level, motion_detected</strong>
+            <span class="summary-label">Safety Topic</span>
+            <strong>smart_toddler/safety/status</strong>
+          </div>
+          <div class="detail-item wide">
+            <span class="summary-label">Safety Payload Data</span>
+            <strong>kids_close, lock_status</strong>
           </div>
         </div>
       </article>

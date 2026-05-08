@@ -37,14 +37,17 @@ Payload:
 ```json
 {
   "node_id": "safety_1",
-  "timestamp": "2026-05-07T12:00:05Z",
   "status": "ok",
   "data": {
-    "boundary_alert": false,
-    "lock_status": "locked"
+    "kids_close": 1,
+    "lock_status": 0
   }
 }
 ```
+
+`kids_close` should be `1` when the kid is close to the safety boundary and `0` otherwise.
+
+`lock_status` should be `1` for locked and `0` for unlocked.
 
 ## Alert
 
