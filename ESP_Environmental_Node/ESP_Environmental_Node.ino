@@ -28,6 +28,7 @@ int humid;
 float light_value;
 float sound_value;
 int motion_detected;
+bool detected;
 
 void sendData() {
   StaticJsonDocument<256> doc;
@@ -40,7 +41,7 @@ void sendData() {
   data["humidity"] = humid;
   data["light_level"] = light_value;
   data["sound_level"] = sound_value;
-  data["motion_detected"] = motion_detected;
+  data["motion_detected"] = (detected) ? 1 : 0;
 
   char payload[256];
   serializeJson(doc, payload);
@@ -77,6 +78,10 @@ void loop() {
   sound_value = analogRead(SOUND_PIN);
   motion_detected = digitalRead(MOTION_PIN);
 
+  if (motion_detected == HIGH) {
+    detected = true;
+  }
+
   now = micros();
   if (now - last_sensed >= slow_sense_time) {
 
@@ -105,12 +110,13 @@ void loop() {
     if (!client.connected()) {
       Serial.println(("Disconnected from server"));
       client.connect("environment_1");
-      delay(3000000);
+      delay(3000);
     }
 
     client.loop();
 
     sendData();
+    detected = false;
   }
 
 }
