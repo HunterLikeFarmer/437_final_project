@@ -39,15 +39,38 @@ Payload:
   "node_id": "safety_1",
   "status": "ok",
   "data": {
-    "kids_close": 1,
-    "lock_status": 0
+    "kids_close": 1
   }
 }
 ```
 
 `kids_close` should be `1` when the kid is close to the safety boundary and `0` otherwise.
 
+The safety `data` object should contain only `kids_close`. The backend also accepts `"data": 1` or `"data": 0`.
+
+## Lock Status
+
+Topic:
+
+```text
+smart_toddler/lock/status
+```
+
+Payload:
+
+```json
+{
+  "node_id": "lock_1",
+  "status": "ok",
+  "data": {
+    "lock_status": 0
+  }
+}
+```
+
 `lock_status` should be `1` for locked and `0` for unlocked.
+
+The lock `data` object should contain only `lock_status`. The backend also accepts `"data": 1` or `"data": 0`.
 
 ## Alert
 
@@ -74,16 +97,27 @@ Payload:
 Topic:
 
 ```text
-smart_toddler/safety/command
+smart_toddler/lock/command
 ```
 
 Payload:
 
 ```json
 {
-  "command": "unlock",
+  "command": "lock",
   "value": true,
   "source": "web_dashboard",
   "timestamp": "2026-05-07T12:02:00Z"
+}
+```
+
+Use this payload to unlock:
+
+```json
+{
+  "command": "unlock",
+  "value": false,
+  "source": "web_dashboard",
+  "timestamp": "2026-05-07T12:03:00Z"
 }
 ```

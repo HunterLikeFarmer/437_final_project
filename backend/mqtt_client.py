@@ -40,6 +40,7 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         client.subscribe("smart_toddler/environment/status")
         client.subscribe("smart_toddler/safety/status")
+        client.subscribe("smart_toddler/lock/status")
         client.subscribe("smart_toddler/system/alert")
         client.subscribe("smart_toddler/system/heartbeat")
         create_event("mqtt", "system", "low", "Connected to MQTT broker")

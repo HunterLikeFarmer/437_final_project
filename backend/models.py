@@ -50,6 +50,11 @@ def default_system_state():
             "status": None,
             "kids_close": False,
             "boundary_alert": False,
+            "last_updated": None
+        },
+        "lock": {
+            "node_id": None,
+            "status": None,
             "lock_value": None,
             "lock_status": "unknown",
             "last_updated": None

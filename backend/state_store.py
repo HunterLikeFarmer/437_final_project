@@ -10,6 +10,7 @@ _current_state = default_system_state()
 _next_alert_id = 1
 ENVIRONMENT_STATUS_TOPIC = "smart_toddler/environment/status"
 SAFETY_STATUS_TOPIC = "smart_toddler/safety/status"
+LOCK_STATUS_TOPIC = "smart_toddler/lock/status"
 
 
 # Returns the payload timestamp, or creates a current timestamp if missing.
@@ -58,7 +59,8 @@ def _lock_status(value):
 # Updates the in-memory dashboard state based on an MQTT topic and payload.
 def update_state_from_mqtt(topic, payload):
     timestamp = _timestamp(payload)
-    data = payload.get("data", {})
+    raw_data = payload.get("data", {})
+    data = raw_data if isinstance(raw_data, dict) else {}
 
     with _state_lock:
         if topic == ENVIRONMENT_STATUS_TOPIC:
@@ -87,25 +89,27 @@ def update_state_from_mqtt(topic, payload):
                 })
 
         if topic == SAFETY_STATUS_TOPIC:
-            kids_close_value = data.get(
-                "kids_close",
-                data.get("kid_close", data.get("child_close", data.get("boundary_alert", payload.get("kids_close", False))))
-            )
-            lock_value = data.get("lock_status", data.get("locked", payload.get("lock_status")))
-            kids_close = _device_bool(kids_close_value)
-            lock_status = _lock_status(lock_value)
+            has_scalar_data = raw_data not in (None, {}) and not isinstance(raw_data, dict)
+            has_kids_close = has_scalar_data or any(key in data for key in ("kids_close", "kid_close", "child_close", "boundary_alert")) or "kids_close" in payload
 
             _current_state["safety"].update({
                 "node_id": payload.get("node_id"),
                 "status": payload.get("status"),
-                "kids_close": kids_close,
-                "boundary_alert": kids_close,
-                "lock_value": lock_value,
-                "lock_status": lock_status,
                 "last_updated": timestamp
             })
 
-            if kids_close:
+            if has_kids_close:
+                kids_close_value = raw_data if has_scalar_data else data.get(
+                    "kids_close",
+                    data.get("kid_close", data.get("child_close", data.get("boundary_alert", payload.get("kids_close"))))
+                )
+                kids_close = _device_bool(kids_close_value)
+                _current_state["safety"].update({
+                    "kids_close": kids_close,
+                    "boundary_alert": kids_close
+                })
+
+            if has_kids_close and _current_state["safety"]["kids_close"]:
                 _upsert_alert(make_alert(
                     alert_id=payload.get("id", "safety_boundary"),
                     severity=payload.get("severity", "high"),
@@ -114,6 +118,23 @@ def update_state_from_mqtt(topic, payload):
                     timestamp=timestamp,
                     alert_type=payload.get("alert_type", "boundary")
                 ))
+
+        if topic == LOCK_STATUS_TOPIC:
+            has_scalar_data = raw_data not in (None, {}) and not isinstance(raw_data, dict)
+            has_lock_status = has_scalar_data or any(key in data for key in ("lock_status", "locked", "lock")) or any(key in payload for key in ("lock_status", "locked", "lock"))
+
+            _current_state["lock"].update({
+                "node_id": payload.get("node_id"),
+                "status": payload.get("status"),
+                "last_updated": timestamp
+            })
+
+            if has_lock_status:
+                lock_value = raw_data if has_scalar_data else data.get("lock_status", data.get("locked", data.get("lock", payload.get("lock_status", payload.get("locked", payload.get("lock"))))))
+                _current_state["lock"].update({
+                    "lock_value": lock_value,
+                    "lock_status": _lock_status(lock_value)
+                })
 
         if "/control/" in topic:
             motion_detected = data.get("motion_detected", data.get("motion", payload.get("motion_detected")))

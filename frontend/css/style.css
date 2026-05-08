@@ -293,6 +293,10 @@ h2 {
   grid-column: 1 / -1;
 }
 
+.safety-controls {
+  margin-top: 12px;
+}
+
 .button-icon {
   display: inline-grid;
   place-items: center;

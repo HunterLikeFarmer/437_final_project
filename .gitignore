@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .env
 data/app.db
+data/*.log
 .venv/
 node_modules/
 .DS_Store

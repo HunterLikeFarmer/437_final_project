@@ -33,6 +33,19 @@
     return String(value === null || value === undefined ? "" : value);
   }
 
+  function deviceBoolean(value) {
+    if (typeof value === "boolean") {
+      return value;
+    }
+    if (typeof value === "number") {
+      return value !== 0;
+    }
+    if (typeof value === "string") {
+      return ["1", "true", "yes", "close", "near", "locked"].includes(value.trim().toLowerCase());
+    }
+    return false;
+  }
+
   function setText(id, value) {
     const element = byId(id);
     if (element) {
@@ -70,16 +83,20 @@
   function renderStatusCards(status) {
     const environment = status.environment || {};
     const safety = status.safety || {};
+    const lock = status.lock || {};
     const motion = status.motion || {};
     const sound = status.sound || {};
     const alerts = Array.isArray(status.alerts) ? status.alerts : [];
 
-    const kidsClose = Boolean(safety.kids_close || safety.boundary_alert);
-    const lockStatus = safety.lock_status || "unknown";
-    const lockValue = safety.lock_value;
+    const kidsClose = safety.kids_close === undefined || safety.kids_close === null
+      ? deviceBoolean(safety.boundary_alert)
+      : deviceBoolean(safety.kids_close);
+    const lockStatus = lock.lock_status || "unknown";
+    const lockValue = lock.lock_value;
     const motionDetected = Boolean(motion.detected);
     const environmentStatus = environment.status || "waiting";
     const safetyStatus = safety.status || "waiting";
+    const lockNodeStatus = lock.status || "waiting";
 
     replaceChildren("environment-cards", [
       metricCard("Temperature", valueOrDash(environment.temperature, " C"), "Room sensor reading"),
@@ -90,7 +107,7 @@
     replaceChildren("safety-cards", [
       metricCard("Kid Close", kidsClose ? "Yes" : "No", "ESP32 value: kids_close", kidsClose ? "bad" : "good"),
       metricCard("Lock", text(lockStatus), `ESP32 value: ${valueOrDash(lockValue)}`, lockStatus === "locked" ? "good" : "warn"),
-      metricCard("Node", safety.node_id || "--", `Status: ${safetyStatus}`, safetyStatus === "ok" ? "good" : "")
+      metricCard("Node", safety.node_id || "--", `Lock node: ${lock.node_id || "--"}`, safetyStatus === "ok" && lockNodeStatus === "ok" ? "good" : "")
     ]);
 
     replaceChildren("activity-cards", [
@@ -102,20 +119,26 @@
     const timestamps = [
       environment.last_updated,
       safety.last_updated,
+      lock.last_updated,
       motion.last_updated,
       sound.last_updated
     ].filter(Boolean);
     const lastUpdated = timestamps.length > 0 ? timestamps.sort().at(-1) : null;
 
     setText("environment-updated", `Updated ${formatTime(environment.last_updated)}`);
-    setText("safety-updated", `Updated ${formatTime(safety.last_updated)}`);
+    setText("safety-updated", `Updated ${formatTime(safety.last_updated || lock.last_updated)}`);
     setText("activity-updated", `Updated ${formatTime(motion.last_updated || sound.last_updated)}`);
     setText("environment-node-id", environment.node_id || "--");
     setText("safety-node-id", safety.node_id || "--");
-    setText("command-status", environment.status || safety.status ? "Receiving" : "Listening");
+    setText("lock-node-id", lock.node_id || "--");
+    setText("command-status", environment.status || safety.status || lock.status ? "Receiving" : "Listening");
     setText("last-update", formatTime(lastUpdated));
     setText("active-alert-count", text(alerts.length));
     setText("overall-status", alerts.length > 0 || kidsClose || motionDetected ? "Needs attention" : "All clear");
+
+    if (window.SmartToddlerControls) {
+      window.SmartToddlerControls.updateLockControl(status);
+    }
   }
 
   function renderAlerts(alerts) {

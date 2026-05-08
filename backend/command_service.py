@@ -13,7 +13,7 @@ ALLOWED_COMMANDS = {
     "set_dashboard_mode"
 }
 
-ALLOWED_TARGETS = {"environment", "safety", "control", "system"}
+ALLOWED_TARGETS = {"environment", "safety", "lock", "control", "system"}
 
 
 # Validates a browser command, logs it, and publishes it to MQTT.
@@ -30,6 +30,9 @@ def handle_command(command_request):
 
     if command not in ALLOWED_COMMANDS:
         return {"status": "error", "message": f"Unsupported command: {command}"}, 400
+
+    if command in {"lock", "unlock"} and target != "lock":
+        return {"status": "error", "message": "Lock commands must target lock"}, 400
 
     payload = {
         "command": command,

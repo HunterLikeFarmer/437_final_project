@@ -17,6 +17,7 @@ Each ESP32 should use a unique MQTT client id, such as:
 ```text
 smart_toddler_environment_1
 smart_toddler_safety_1
+smart_toddler_lock_1
 smart_toddler_control_1
 ```
 
@@ -33,6 +34,7 @@ Valid node names:
 ```text
 environment
 safety
+lock
 control
 system
 ```
@@ -48,14 +50,15 @@ heartbeat
 
 ## Topics The Current Backend Listens To
 
-The current backend and frontend expect the environmental node and safety node to publish these topics:
+The current backend and frontend expect the environmental, safety, and lock nodes to publish these topics:
 
 ```text
 smart_toddler/environment/status
 smart_toddler/safety/status
+smart_toddler/lock/status
 ```
 
-The environmental payload stays the same as `ESP_Environmental_Node.ino`. The safety payload should contain whether the kid got close and whether the lock is locked.
+The environmental payload stays the same as `ESP_Environmental_Node.ino`. The safety payload should contain only whether the kid got close. The lock payload should contain only whether the lock is locked.
 
 ## Topics ESP32 Devices Should Publish
 
@@ -69,6 +72,12 @@ Safety node:
 
 ```text
 smart_toddler/safety/status
+```
+
+Lock node:
+
+```text
+smart_toddler/lock/status
 ```
 
 Control node:
@@ -97,10 +106,10 @@ Environment node:
 smart_toddler/environment/command
 ```
 
-Safety node:
+Lock node:
 
 ```text
-smart_toddler/safety/command
+smart_toddler/lock/command
 ```
 
 Control node:
@@ -184,8 +193,7 @@ Payload:
   "node_id": "safety_1",
   "status": "ok",
   "data": {
-    "kids_close": 1,
-    "lock_status": 0
+    "kids_close": 1
   }
 }
 ```
@@ -195,7 +203,36 @@ Field meanings:
 | Field | Meaning |
 |---|---|
 | `kids_close` | `1` means the kid is close to the safety boundary, `0` means clear |
+
+The `data` object for `smart_toddler/safety/status` should contain only this one field. The backend also accepts the compact form `"data": 1` or `"data": 0`.
+
+## Lock Status Payload
+
+Publish to:
+
+```text
+smart_toddler/lock/status
+```
+
+Payload:
+
+```json
+{
+  "node_id": "lock_1",
+  "status": "ok",
+  "data": {
+    "lock_status": 0
+  }
+}
+```
+
+Field meanings:
+
+| Field | Meaning |
+|---|---|
 | `lock_status` | `1` means locked, `0` means unlocked |
+
+The `data` object for `smart_toddler/lock/status` should contain only this one field. The backend also accepts the compact form `"data": 1` or `"data": 0`.
 
 The backend converts `lock_status` into dashboard text:
 
@@ -283,11 +320,41 @@ ESP32 devices should subscribe to their command topic and expect payloads like t
 ```json
 {
   "command": "unlock",
+  "value": false,
+  "source": "web_dashboard",
+  "timestamp": "2026-05-07T12:02:00Z"
+}
+```
+
+For the lock feature, the lock edge device should subscribe to:
+
+```text
+smart_toddler/lock/command
+```
+
+Lock command:
+
+```json
+{
+  "command": "lock",
   "value": true,
   "source": "web_dashboard",
   "timestamp": "2026-05-07T12:02:00Z"
 }
 ```
+
+Unlock command:
+
+```json
+{
+  "command": "unlock",
+  "value": false,
+  "source": "web_dashboard",
+  "timestamp": "2026-05-07T12:03:00Z"
+}
+```
+
+The ESP32 should treat `command` as the primary instruction. The `value` field is the desired lock state: `true` means locked and `false` means unlocked.
 
 Supported commands:
 
@@ -295,8 +362,8 @@ Supported commands:
 |---|---|---|
 | `play_lullaby` | `smart_toddler/control/command` | Start playing a lullaby |
 | `stop_lullaby` | `smart_toddler/control/command` | Stop the lullaby |
-| `lock` | `smart_toddler/safety/command` | Lock the safety device |
-| `unlock` | `smart_toddler/safety/command` | Unlock the safety device |
+| `lock` | `smart_toddler/lock/command` | Lock the safety device |
+| `unlock` | `smart_toddler/lock/command` | Unlock the safety device |
 | `reset_alarm` | `smart_toddler/control/command` | Reset local alarm output |
 
 ## Command Acknowledgment
@@ -307,10 +374,22 @@ Example:
 
 ```json
 {
-  "node_id": "safety_1",
+  "node_id": "lock_1",
   "timestamp": "2026-05-07T12:02:01Z",
   "command": "unlock",
   "status": "received"
+}
+```
+
+After a lock state change, publish the normal lock status again so the dashboard button follows the actual device state:
+
+```json
+{
+  "node_id": "lock_1",
+  "status": "ok",
+  "data": {
+    "lock_status": 1
+  }
 }
 ```
 
@@ -318,7 +397,7 @@ For failed commands:
 
 ```json
 {
-  "node_id": "safety_1",
+  "node_id": "lock_1",
   "timestamp": "2026-05-07T12:02:01Z",
   "command": "unlock",
   "status": "error",

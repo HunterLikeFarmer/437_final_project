@@ -21,6 +21,26 @@
     });
   }
 
+  function updateLockControl(status) {
+    const button = document.getElementById("lock-toggle-button");
+    const label = document.getElementById("lock-toggle-label");
+    const icon = document.getElementById("lock-toggle-icon");
+    if (!button || !label || !icon) {
+      return;
+    }
+
+    const lock = status.lock || {};
+    const isLocked = lock.lock_status === "locked";
+    const action = isLocked ? "unlock" : "lock";
+
+    button.dataset.target = "lock";
+    button.dataset.action = action;
+    button.dataset.value = isLocked ? "false" : "true";
+    button.classList.toggle("warning", isLocked);
+    icon.textContent = isLocked ? "U" : "L";
+    label.textContent = isLocked ? "Unlock Device" : "Lock Device";
+  }
+
   async function handleControlClick(event) {
     const button = event.target.closest("button[data-action]");
     if (!button) {
@@ -59,6 +79,7 @@
   }
 
   window.SmartToddlerControls = {
-    initializeControls
+    initializeControls,
+    updateLockControl
   };
 })();

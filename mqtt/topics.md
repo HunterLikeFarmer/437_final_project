@@ -11,6 +11,7 @@ Backend subscriptions:
 ```text
 smart_toddler/environment/status
 smart_toddler/safety/status
+smart_toddler/lock/status
 smart_toddler/system/alert
 smart_toddler/system/heartbeat
 ```
@@ -26,10 +27,11 @@ Common topics:
 | Topic | Direction | Purpose |
 |---|---|---|
 | `smart_toddler/environment/status` | Device to backend | Temperature, humidity, light, sound, and motion updates |
-| `smart_toddler/safety/status` | Device to backend | Kid proximity and lock status |
+| `smart_toddler/safety/status` | Device to backend | Kid proximity only |
+| `smart_toddler/lock/status` | Device to backend | Lock state only |
 | `smart_toddler/control/status` | Device to backend | Motion, sound, and command acknowledgments |
 | `smart_toddler/environment/command` | Backend to device | Environment node commands |
-| `smart_toddler/safety/command` | Backend to device | Safety node commands |
+| `smart_toddler/lock/command` | Backend to device | Safety lock and unlock commands |
 | `smart_toddler/control/command` | Backend to device | Lullaby, reset, and control hub commands |
 | `smart_toddler/system/alert` | Device to backend | Alert notification |
 | `smart_toddler/system/heartbeat` | Device to backend | Device alive check |

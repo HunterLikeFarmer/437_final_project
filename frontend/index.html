@@ -55,6 +55,12 @@
           <span class="panel-status" id="safety-updated">No data</span>
         </div>
         <div class="metric-grid" id="safety-cards"></div>
+        <div class="control-grid safety-controls" id="controls" aria-label="Safety device controls">
+          <button type="button" class="control-button wide" id="lock-toggle-button" data-target="lock" data-action="lock" data-value="true">
+            <span class="button-icon" id="lock-toggle-icon" aria-hidden="true">L</span>
+            <span id="lock-toggle-label">Lock Device</span>
+          </button>
+        </div>
       </article>
 
       <article class="panel">
@@ -85,17 +91,25 @@
             <span class="summary-label">Safety Node</span>
             <strong id="safety-node-id">--</strong>
           </div>
+          <div class="detail-item">
+            <span class="summary-label">Lock Node</span>
+            <strong id="lock-node-id">--</strong>
+          </div>
           <div class="detail-item wide">
             <span class="summary-label">Environment Topic</span>
             <strong>smart_toddler/environment/status</strong>
           </div>
           <div class="detail-item wide">
-            <span class="summary-label">Safety Topic</span>
+            <span class="summary-label">Kid Detection Topic</span>
             <strong>smart_toddler/safety/status</strong>
           </div>
           <div class="detail-item wide">
-            <span class="summary-label">Safety Payload Data</span>
-            <strong>kids_close, lock_status</strong>
+            <span class="summary-label">Lock Topic</span>
+            <strong>smart_toddler/lock/status; commands on smart_toddler/lock/command</strong>
+          </div>
+          <div class="detail-item wide">
+            <span class="summary-label">Safety & Lock Payload Data</span>
+            <strong>safety data: kids_close; lock data: lock_status</strong>
           </div>
         </div>
       </article>
