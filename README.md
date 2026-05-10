@@ -31,14 +31,36 @@ mosquitto -c mqtt/mosquitto.conf
 
 ## Start Flask Backend
 
+For local testing on the same computer only:
+
 ```bash
-python backend/app.py
+python backend/app.py --testing
 ```
 
 Open the dashboard at:
 
 ```text
 http://localhost:5000
+```
+
+For LAN access from another computer on the same Wi-Fi or wired network:
+
+```bash
+python backend/app.py --production
+```
+
+The terminal prints a LAN URL similar to:
+
+```text
+http://192.168.1.25:5000
+```
+
+Open that URL from the other computer. If it does not load, allow Python or port `5000` through the host computer's firewall, and make sure both computers are on the same LAN.
+
+You can also override the port in either mode:
+
+```bash
+python backend/app.py --production --port 8080
 ```
 
 The frontend can also be opened directly from `frontend/index.html`. When opened as a local file, it will call `http://localhost:5000` for API requests.

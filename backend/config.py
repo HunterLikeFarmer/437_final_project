@@ -8,8 +8,9 @@ load_dotenv()
 
 # Stores backend configuration values loaded from environment variables.
 class Config:
-    FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0")
+    FLASK_HOST = os.getenv("FLASK_HOST", "127.0.0.1")
     FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
+    FLASK_DEBUG = os.getenv("FLASK_DEBUG", "true").lower() in ("1", "true", "yes", "on")
     MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
     MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))
     MQTT_CLIENT_ID = os.getenv("MQTT_CLIENT_ID", "smart-dashboard-backend")
